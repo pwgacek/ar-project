@@ -1,0 +1,75 @@
+ gcccore/11.2.0 loaded.
+ zlib/1.2.11-gcccore-11.2.0 loaded.
+ binutils/2.37-gcccore-11.2.0 loaded.
+ intel-compilers/2021.4.0 loaded.
+ numactl/2.0.14-gcccore-11.2.0 loaded.
+ ucx/1.11.2-gcccore-11.2.0 loaded.
+ impi/2021.4.0-intel-compilers-2021.4.0 loaded.
+ imkl/2021.4.0 loaded.
+ iimpi/2021b loaded.
+ imkl-fftw/2021.4.0-iimpi-2021b loaded.
+ intel/2021b loaded.
+ bzip2/1.0.8-gcccore-11.2.0 loaded.
+ ncurses/6.2-gcccore-11.2.0 loaded.
+ libreadline/8.1-gcccore-11.2.0 loaded.
+ tcl/8.6.11-gcccore-11.2.0 loaded.
+ sqlite/3.36-gcccore-11.2.0 loaded.
+ xz/5.2.5-gcccore-11.2.0 loaded.
+ gmp/6.2.1-gcccore-11.2.0 loaded.
+ libffi/3.4.2-gcccore-11.2.0 loaded.
+ openssl/1.1 loaded.
+ python/3.9.6-gcccore-11.2.0 loaded.
+ pybind11/2.7.1-gcccore-11.2.0 loaded.
+ scipy-bundle/2021.10-intel-2021b loaded.
+Compiling classic_ising.cpp...
+Compilation successful.
+Starting magnetization experiment...
+Temperature T=2.0
+  Repetition 1/5
+Using random seed: 616128922
+Simulation completed in 179.184124 seconds
+  Repetition 2/5
+Using random seed: 801385867
+Simulation completed in 179.169602 seconds
+  Repetition 3/5
+Using random seed: 998172480
+Simulation completed in 179.545670 seconds
+  Repetition 4/5
+Using random seed: 1570159009
+Simulation completed in 178.994154 seconds
+  Repetition 5/5
+Using random seed: 1579357537
+Simulation completed in 180.238433 seconds
+Temperature T=2.5
+  Repetition 1/5
+Using random seed: -1472978566
+Simulation completed in 187.074345 seconds
+  Repetition 2/5
+Using random seed: -1951579887
+Simulation completed in 185.686961 seconds
+  Repetition 3/5
+Using random seed: 457145835
+Simulation completed in 187.253384 seconds
+  Repetition 4/5
+Using random seed: 132120809
+Simulation completed in 187.224921 seconds
+  Repetition 5/5
+Using random seed: -211868607
+Simulation completed in 188.671353 seconds
+Temperature T=1.0
+  Repetition 1/5
+Using random seed: 901665902
+Simulation completed in 172.392396 seconds
+  Repetition 2/5
+Using random seed: -1395521703
+Simulation completed in 173.974360 seconds
+  Repetition 3/5
+Using random seed: -2099478297
+Simulation completed in 172.299166 seconds
+  Repetition 4/5
+Using random seed: -200519273
+Simulation completed in 172.562667 seconds
+  Repetition 5/5
+Using random seed: 1981539244
+Simulation completed in 172.347730 seconds
+Magnetization experiment completed. Results saved to results.csv

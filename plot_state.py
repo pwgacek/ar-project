@@ -81,8 +81,8 @@ def plot_ising_state(lattice, filename='ising_state.png'):
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.tight_layout()
-    # plt.savefig(filename, dpi=150)
-    # print(f"Figure saved as {filename}")
+    plt.savefig(filename, dpi=150)
+    print(f"Figure saved as {filename}")
     plt.show()
 
 def analyze_ising_state(lattice):
