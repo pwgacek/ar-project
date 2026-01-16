@@ -5,9 +5,9 @@ import numpy as np
 from mpi4py import MPI
 
 # --- Simulation Parameters ---
-T = 2.5
+T = 2.0
 J = 1.0
-sweeps = 20
+sweeps = 10
 seed = 123
 k_B = 1.0
 
@@ -66,7 +66,7 @@ def main():
     L, Px, Py, lx, ly = comm.bcast(config, root=0)
     
     # Prepare local block buffer
-    initial_block = np.empty((lx, ly), dtype=np.int8)
+    initial_block = np.empty((ly, lx), dtype=np.int8)
     
     if rank == 0:
         # Send blocks to other ranks
@@ -75,7 +75,7 @@ def main():
             x0, x1 = rpx * lx, (rpx + 1) * lx
             y0, y1 = rpy * ly, (rpy + 1) * ly
             
-            block_to_send = np.ascontiguousarray(global_grid[x0:x1, y0:y1])
+            block_to_send = np.ascontiguousarray(global_grid[y0:y1, x0:x1])
             
             if r == 0:
                 initial_block = block_to_send
@@ -95,8 +95,8 @@ def main():
     px, py = rank % Px, rank // Px
 
     # Local spins with ghost borders
-    spins = np.empty((lx + 2, ly + 2), dtype=np.int8)
-    spins[1:lx+1, 1:ly+1] = initial_block
+    spins = np.empty((ly + 2, lx + 2), dtype=np.int8)
+    spins[1:ly+1, 1:lx+1] = initial_block
 
     # Neighbor ranks
     up = (py - 1) % Py * Px + px
@@ -105,10 +105,10 @@ def main():
     right = py * Px + (px + 1) % Px
 
     # Preallocate buffers
-    send_left = np.empty(lx, dtype=spins.dtype)
-    send_right = np.empty(lx, dtype=spins.dtype)
-    recv_left = np.empty(lx, dtype=spins.dtype)
-    recv_right = np.empty(lx, dtype=spins.dtype)
+    send_left = np.empty(ly, dtype=spins.dtype)
+    send_right = np.empty(ly, dtype=spins.dtype)
+    recv_left = np.empty(ly, dtype=spins.dtype)
+    recv_right = np.empty(ly, dtype=spins.dtype)
 
     def exchange_ghosts():
         TAG_ROW_UP = 10
@@ -117,22 +117,22 @@ def main():
         TAG_COL_RIGHT = 21
 
         # Rows
-        comm.Sendrecv(sendbuf=spins[1, 1:ly+1], dest=up, sendtag=TAG_ROW_UP,
-                      recvbuf=spins[lx+1, 1:ly+1], source=down, recvtag=TAG_ROW_UP)
-        comm.Sendrecv(sendbuf=spins[lx, 1:ly+1], dest=down, sendtag=TAG_ROW_DOWN,
-                      recvbuf=spins[0, 1:ly+1], source=up, recvtag=TAG_ROW_DOWN)
+        comm.Sendrecv(sendbuf=spins[1, 1:lx+1], dest=up, sendtag=TAG_ROW_UP,
+                      recvbuf=spins[ly+1, 1:lx+1], source=down, recvtag=TAG_ROW_UP)
+        comm.Sendrecv(sendbuf=spins[ly, 1:lx+1], dest=down, sendtag=TAG_ROW_DOWN,
+                      recvbuf=spins[0, 1:lx+1], source=up, recvtag=TAG_ROW_DOWN)
 
         # Columns
-        send_left[:] = spins[1:lx+1, 1]
-        send_right[:] = spins[1:lx+1, ly]
+        send_left[:] = spins[1:ly+1, 1]
+        send_right[:] = spins[1:ly+1, lx]
 
         comm.Sendrecv(sendbuf=send_left, dest=left, sendtag=TAG_COL_LEFT,
                       recvbuf=recv_right, source=right, recvtag=TAG_COL_LEFT)
         comm.Sendrecv(sendbuf=send_right, dest=right, sendtag=TAG_COL_RIGHT,
                       recvbuf=recv_left, source=left, recvtag=TAG_COL_RIGHT)
 
-        spins[1:lx+1, 0] = recv_left
-        spins[1:lx+1, ly+1] = recv_right
+        spins[1:ly+1, 0] = recv_left
+        spins[1:ly+1, lx+1] = recv_right
 
     # Metropolis lookup table
     exp_lookup = {
@@ -141,10 +141,10 @@ def main():
     }
 
     # Staleness tracking
-    stale_top = np.zeros(ly, dtype=bool)
-    stale_bottom = np.zeros(ly, dtype=bool)
-    stale_left = np.zeros(lx, dtype=bool)
-    stale_right = np.zeros(lx, dtype=bool)
+    stale_top = np.zeros(lx, dtype=bool)
+    stale_bottom = np.zeros(lx, dtype=bool)
+    stale_left = np.zeros(ly, dtype=bool)
+    stale_right = np.zeros(ly, dtype=bool)
 
     exchange_ghosts()
 
@@ -154,11 +154,11 @@ def main():
         out = open('classic_magnetization.txt', 'w', buffering=1024 * 1024)
         
     for sweep in range(sweeps):
-        for _ in range(lx * ly):
-            i = int(common_rng.integers(1, lx + 1))
-            j = int(common_rng.integers(1, ly + 1))
+        for _ in range(ly * lx):
+            i = int(common_rng.integers(1, ly + 1))
+            j = int(common_rng.integers(1, lx + 1))
 
-            is_border = (i == 1) or (i == lx) or (j == 1) or (j == ly)
+            is_border = (i == 1) or (i == ly) or (j == 1) or (j == lx)
 
             if is_border:
             
@@ -190,13 +190,13 @@ def main():
                     spins[i, j] = -s
 
             if is_border:
-                if j == ly: stale_left[i - 1] = True
-                if j == 1: stale_right[i - 1] = True
-                if i == lx: stale_top[j - 1] = True
-                if i == 1: stale_bottom[j - 1] = True
+                if j == 1: stale_left[i - 1] = True
+                if j == lx: stale_right[i - 1] = True
+                if i == 1: stale_top[j - 1] = True
+                if i == ly: stale_bottom[j - 1] = True
 
         # Calculate Magnetization
-        local_M = np.sum(spins[1:lx+1, 1:ly+1])
+        local_M = np.sum(spins[1:ly+1, 1:lx+1])
         M = comm.reduce(local_M, op=MPI.SUM, root=0)
         
         if rank == 0:
@@ -208,10 +208,10 @@ def main():
 
     # --- Step 4: Gather Results ---
     
-    final_local = np.ascontiguousarray(spins[1:lx+1, 1:ly+1])
+    final_local = np.ascontiguousarray(spins[1:ly+1, 1:lx+1])
     gathered = None
     if rank == 0:
-        gathered = np.empty((size, lx, ly), dtype=np.int8)
+        gathered = np.empty((size, ly, lx), dtype=np.int8)
     
     # Gather all blocks to rank 0
     comm.Gather(final_local, gathered, root=0)
@@ -222,7 +222,7 @@ def main():
             rpx, rpy = r % Px, r // Px
             x0, x1 = rpx * lx, (rpx + 1) * lx
             y0, y1 = rpy * ly, (rpy + 1) * ly
-            final_global[x0:x1, y0:y1] = gathered[r, :, :]
+            final_global[y0:y1, x0:x1] = gathered[r, :, :]
 
         end_time = time.time()
         elapsed = end_time - start_time
