@@ -443,10 +443,10 @@ int main(int argc, char** argv) {
             }
             
             if (is_border) {
-                if (j == 1) stale_left[i - 1] = true;
-                if (j == cfg.lx) stale_right[i - 1] = true;
-                if (i == 1) stale_top[j - 1] = true;
-                if (i == cfg.ly) stale_bottom[j - 1] = true;
+                if (j == 1) stale_right[i - 1] = true;
+                if (j == cfg.lx) stale_left[i - 1] = true;
+                if (i == 1) stale_bottom[j - 1] = true;
+                if (i == cfg.ly) stale_top[j - 1] = true;
             }
         }
         
